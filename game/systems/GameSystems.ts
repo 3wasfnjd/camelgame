@@ -32,23 +32,23 @@ export class NeedsSystem {
     if (this.thirst < 78 && this.water > 0) {
       this.water -= 1;
       this.thirst = clamp(this.thirst + 38);
-      return "Water restored thirst";
+      return "شربت الماء واستعدت مستوى العطش";
     }
     if (this.hunger < 82 && this.dates > 0) {
       this.dates -= 1;
       this.hunger = clamp(this.hunger + 24);
-      return "Dates restored hunger";
+      return "أكلت التمر واستعدت مستوى الغذاء";
     }
-    return this.water + this.dates > 0 ? "No supply needed yet" : "Your satchel is empty";
+    return this.water + this.dates > 0 ? "لا تحتاج إلى المؤن الآن" : "حقيبتك فارغة";
   }
 }
 
 type WeatherPreset = { kind: WeatherKind; label: string; duration: number; wind: number; heat: number };
 const WEATHER: WeatherPreset[] = [
-  { kind: "clear", label: "Clear skies", duration: 48, wind: .18, heat: .65 },
-  { kind: "windy", label: "Desert wind", duration: 32, wind: .5, heat: .55 },
-  { kind: "sandstorm", label: "Sandstorm", duration: 22, wind: 1, heat: .25 },
-  { kind: "clear", label: "Clear skies", duration: 55, wind: .16, heat: .75 },
+  { kind: "clear", label: "أجواء صافية", duration: 48, wind: .18, heat: .65 },
+  { kind: "windy", label: "رياح صحراوية", duration: 32, wind: .5, heat: .55 },
+  { kind: "sandstorm", label: "عاصفة رملية", duration: 22, wind: 1, heat: .25 },
+  { kind: "clear", label: "أجواء صافية", duration: 55, wind: .16, heat: .75 },
 ];
 
 export class WeatherSystem {
@@ -86,9 +86,9 @@ export class DayNightSystem {
 
 type Mission = { title: string; detail: string; target: Vector3; arrival: string };
 const MISSIONS: Mission[] = [
-  { title: "Reach the Moonwell Oasis", detail: "Follow the turquoise beacon and find fresh water.", target: new Vector3(35, 0, -28), arrival: "Moonwell discovered — saddle blanket unlocked" },
-  { title: "Read the Sunstone Ruins", detail: "Cross the high dunes and seek the ancient stone arch.", target: new Vector3(-48, 0, 42), arrival: "The Sunstone inscription reveals an old caravan route" },
-  { title: "Return to Ember Camp", detail: "Carry the discovered route back to the desert camp.", target: new Vector3(48, 0, 35), arrival: "Trail complete — Sahra is now a Wayfinder" },
+  { title: "الوصول إلى واحة بئر القمر", detail: "اتبع الشعاع الفيروزي واعثر على الماء العذب.", target: new Vector3(35, 0, -28), arrival: "اكتشفت واحة بئر القمر — تم فتح غطاء سرج جديد" },
+  { title: "استكشاف أطلال حجر الشمس", detail: "اعبر الكثبان العالية وابحث عن القوس الحجري القديم.", target: new Vector3(-48, 0, 42), arrival: "كشفت نقوش حجر الشمس عن طريق قديم للقوافل" },
+  { title: "العودة إلى مخيم الجمر", detail: "احمل معلومات الطريق المكتشف إلى المخيم الصحراوي.", target: new Vector3(48, 0, 35), arrival: "اكتملت الرحلة — أصبحت صحراء دليلة للقوافل" },
 ];
 
 export class MissionSystem {

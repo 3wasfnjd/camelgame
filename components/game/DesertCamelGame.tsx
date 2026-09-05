@@ -16,10 +16,10 @@ const initialSnapshot: GameSnapshot = {
   water: 2,
   dates: 4,
   time: "16:30",
-  weather: "Clear skies",
-  location: "Amber Dunes",
-  objective: "Reach the Moonwell Oasis",
-  objectiveDetail: "Follow the turquoise beacon and find fresh water.",
+  weather: "أجواء صافية",
+  location: "كثبان العنبر",
+  objective: "الوصول إلى واحة بئر القمر",
+  objectiveDetail: "اتبع الشعاع الفيروزي واعثر على الماء العذب.",
   objectiveDistance: 890,
   level: 1,
   toast: "",
@@ -73,7 +73,7 @@ export function DesertCamelGame() {
         setReady(true);
       } catch (reason) {
         console.error(reason);
-        setError("This device could not start the 3D desert. WebGL may be unavailable.");
+        setError("تعذر تشغيل الصحراء ثلاثية الأبعاد على هذا الجهاز. قد لا يكون WebGL متاحًا.");
       }
     }
     boot();
@@ -164,28 +164,28 @@ export function DesertCamelGame() {
   });
 
   return (
-    <main className="game-shell" aria-label="Desert Camel 3D game">
+    <main className="game-shell" aria-label="لعبة جمل الصحراء ثلاثية الأبعاد" dir="rtl">
       <div ref={mountRef} className="game-canvas" />
       <div className="vignette" />
       <div className="grain" />
 
       {started && (
         <>
-          <section className="hud" aria-label="Game status">
+          <section className="hud" aria-label="حالة اللعبة">
             <div className="status-panel panel">
               <div className="identity-row">
                 <div className="camel-mark"><CamelIcon /></div>
                 <div>
-                  <p className="eyebrow">Caravan scout</p>
-                  <p className="player-name">Sahra · Oasis Seeker</p>
+                  <p className="eyebrow">مستكشفة القوافل</p>
+                  <p className="player-name">صحراء · باحثة الواحات</p>
                 </div>
-                <span className="level-badge">LVL {snapshot.level}</span>
+                <span className="level-badge">المستوى {snapshot.level}</span>
               </div>
               <div className="bars">
-                <StatBar label="Health" value={snapshot.health} tone="health" icon={<Heart />} />
-                <StatBar label="Stamina" value={snapshot.stamina} tone="stamina" icon={<Zap />} />
-                <StatBar label="Water" value={snapshot.thirst} tone="thirst" icon={<Droplets />} />
-                <StatBar label="Food" value={snapshot.hunger} tone="hunger" icon={<Wheat />} />
+                <StatBar label="الصحة" value={snapshot.health} tone="health" icon={<Heart />} />
+                <StatBar label="التحمل" value={snapshot.stamina} tone="stamina" icon={<Zap />} />
+                <StatBar label="العطش" value={snapshot.thirst} tone="thirst" icon={<Droplets />} />
+                <StatBar label="الجوع" value={snapshot.hunger} tone="hunger" icon={<Wheat />} />
               </div>
             </div>
 
@@ -202,58 +202,58 @@ export function DesertCamelGame() {
 
             <div className="objective-panel panel">
               <div className="objective-head">
-                <span className="objective-kicker">Current trail</span>
-                <span className="distance-badge">{snapshot.objectiveDistance < 1000 ? `${snapshot.objectiveDistance} m` : `${(snapshot.objectiveDistance / 1000).toFixed(1)} km`}</span>
+                <span className="objective-kicker">المهمة الحالية</span>
+                <span className="distance-badge">{snapshot.objectiveDistance < 1000 ? `${snapshot.objectiveDistance} م` : `${(snapshot.objectiveDistance / 1000).toFixed(1)} كم`}</span>
               </div>
               <h2 className="objective-title">{snapshot.objective}</h2>
               <p className="objective-copy">{snapshot.objectiveDetail}</p>
             </div>
 
             <div className="inventory-panel panel">
-              <p className="inventory-title">Satchel</p>
+              <p className="inventory-title">الحقيبة</p>
               <div className="inventory-row">
-                <div className="inventory-slot"><Droplets /><span className="inventory-count">×{snapshot.water}</span><span className="inventory-label">Water</span></div>
-                <div className="inventory-slot dates"><Beef /><span className="inventory-count">×{snapshot.dates}</span><span className="inventory-label">Dates</span></div>
+                <div className="inventory-slot"><Droplets /><span className="inventory-count">×{snapshot.water}</span><span className="inventory-label">ماء</span></div>
+                <div className="inventory-slot dates"><Beef /><span className="inventory-count">×{snapshot.dates}</span><span className="inventory-label">تمر</span></div>
               </div>
             </div>
 
             <div className="control-strip panel">
-              <span className="control-chip"><kbd>WASD</kbd> Move</span>
-              <span className="control-chip"><kbd>SHIFT</kbd> Sprint</span>
-              <span className="control-chip"><kbd>SPACE</kbd> Jump</span>
-              <span className="control-chip"><kbd>E</kbd> Use item</span>
+              <span className="control-chip"><kbd dir="ltr">WASD</kbd> التحرك</span>
+              <span className="control-chip"><kbd dir="ltr">SHIFT</kbd> الركض</span>
+              <span className="control-chip"><kbd dir="ltr">SPACE</kbd> القفز</span>
+              <span className="control-chip"><kbd dir="ltr">E</kbd> استخدام</span>
             </div>
 
-            <button className="pause-button" type="button" onClick={togglePause} aria-label="Pause game"><CirclePause /></button>
+            <button className="pause-button" type="button" onClick={togglePause} aria-label="إيقاف اللعبة مؤقتًا"><CirclePause /></button>
           </section>
 
           <div className={`toast ${snapshot.toast ? "visible" : ""}`} role="status" aria-live="polite">{snapshot.toast}</div>
 
-          <div className="mobile-controls" aria-label="Touch controls">
-            <div className="joystick-zone" onPointerDown={onJoystickDown} onPointerMove={onJoystickMove} onPointerUp={endJoystick} onPointerCancel={endJoystick} aria-label="Movement joystick">
+          <div className="mobile-controls" aria-label="أزرار التحكم باللمس">
+            <div className="joystick-zone" onPointerDown={onJoystickDown} onPointerMove={onJoystickMove} onPointerUp={endJoystick} onPointerCancel={endJoystick} aria-label="عصا التحرك">
               <div className="joystick-knob" style={{ "--joy-x": `${joy.x}px`, "--joy-y": `${joy.y}px` } as CSSProperties} />
             </div>
             <div className="mobile-actions">
-              <button type="button" {...hold("jump")}>Jump</button>
-              <button type="button" {...hold("sprint")}>Sprint</button>
+              <button type="button" {...hold("jump")}>قفز</button>
+              <button type="button" {...hold("sprint")}>ركض</button>
             </div>
           </div>
         </>
       )}
 
-      {!ready && !error && <div className="loading-state"><div><div className="loading-orbit" /><p>Raising the dunes…</p></div></div>}
+      {!ready && !error && <div className="loading-state"><div><div className="loading-orbit" /><p>جاري تشكيل الكثبان…</p></div></div>}
 
-      {error && <div className="error-state"><div><ShieldAlert size={38} /><h1>Unable to enter the desert</h1><p>{error}</p></div></div>}
+      {error && <div className="error-state"><div><ShieldAlert size={38} /><h1>تعذر دخول الصحراء</h1><p>{error}</p></div></div>}
 
       {ready && !started && (
         <section className="start-screen">
           <div className="start-card">
-            <div className="title-mark"><Sparkles size={15} /> An open-desert journey</div>
-            <h1 className="game-title">Desert <span>Camel</span></h1>
-            <p className="start-copy">Cross living dunes, find the Moonwell Oasis, and follow an old caravan trail into forgotten ruins. Keep Sahra fed, rested, and ahead of the storm.</p>
-            <div className="button-row"><button className="primary-button" type="button" onClick={begin}><Play size={17} /> Begin journey</button></div>
+            <div className="title-mark"><Sparkles size={15} /> رحلة في الصحراء المفتوحة</div>
+            <h1 className="game-title">جمل <span>الصحراء</span></h1>
+            <p className="start-copy">اعبر الكثبان المتحركة، واعثر على واحة بئر القمر، ثم اتبع طريق القوافل القديم نحو الآثار المنسية. حافظ على غذاء صحراء وراحتها، وابقَ متقدمًا على العاصفة.</p>
+            <div className="button-row"><button className="primary-button" type="button" onClick={begin}><Play size={17} /> ابدأ الرحلة</button></div>
             <div className="start-controls">
-              <span><kbd>WASD</kbd> steer</span><span><kbd>SHIFT</kbd> sprint</span><span><kbd>SPACE</kbd> leap</span><span><kbd>E</kbd> use supplies</span>
+              <span><kbd dir="ltr">WASD</kbd> توجيه</span><span><kbd dir="ltr">SHIFT</kbd> ركض</span><span><kbd dir="ltr">SPACE</kbd> قفز</span><span><kbd dir="ltr">E</kbd> استخدام المؤن</span>
             </div>
           </div>
         </section>
@@ -262,10 +262,10 @@ export function DesertCamelGame() {
       {started && paused && (
         <section className="pause-screen">
           <div className="pause-card panel">
-            <Compass size={28} /><h2>Journey paused</h2><p>The wind will wait. Continue when you are ready.</p>
+            <Compass size={28} /><h2>الرحلة متوقفة</h2><p>الرياح ستنتظر. واصل الرحلة عندما تكون مستعدًا.</p>
             <div className="button-row">
-              <button className="primary-button" type="button" onClick={resume}><Play size={16} /> Resume</button>
-              <button className="secondary-button" type="button" onClick={() => gameRef.current?.useSupply()}><PackageOpen size={16} /> Use supply</button>
+              <button className="primary-button" type="button" onClick={resume}><Play size={16} /> متابعة</button>
+              <button className="secondary-button" type="button" onClick={() => gameRef.current?.useSupply()}><PackageOpen size={16} /> استخدام المؤن</button>
             </div>
           </div>
         </section>

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import type { InputFrame } from "@/game/types";
+import { fitModelToHeight, loadOptionalModel } from "@/game/assets/ModelLibrary";
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
@@ -34,6 +35,10 @@ export class Camel {
   private travelSinceStep = 0;
   private footprintReady = false;
   private footprintSide = 1;
+  private externalModel: THREE.Group | null = null;
+  private mixer: THREE.AnimationMixer | null = null;
+  private actions = new Map<string, THREE.AnimationAction>();
+  private activeAction: THREE.AnimationAction | null = null;
   yaw = 0;
   sprinting = false;
 
@@ -136,6 +141,54 @@ export class Camel {
 
     this.group.position.set(0, this.terrainHeight(0, -5), -5);
     this.group.rotation.y = this.yaw;
+    void this.loadExternalCamel();
+  }
+
+  private async loadExternalCamel() {
+    const loaded = await loadOptionalModel("camel");
+    if (!loaded) return;
+
+    fitModelToHeight(loaded.scene, 4.9);
+    loaded.scene.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+    });
+
+    this.visual.children.forEach((child) => { child.visible = false; });
+    loaded.scene.visible = true;
+    this.visual.add(loaded.scene);
+    this.externalModel = loaded.scene;
+
+    if (loaded.animations.length > 0) {
+      this.mixer = new THREE.AnimationMixer(loaded.scene);
+      loaded.animations.forEach((clip) => this.actions.set(clip.name.toLowerCase(), this.mixer!.clipAction(clip)));
+      this.playExternalAction("idle");
+    }
+  }
+
+  private playExternalAction(state: "idle" | "walk" | "run" | "sprint" | "jump") {
+    if (!this.mixer || this.actions.size === 0) return;
+    const aliases: Record<typeof state, RegExp> = {
+      idle: /idle|rest|stand/,
+      walk: /walk/,
+      run: /run|trot/,
+      sprint: /sprint|gallop|run/,
+      jump: /jump|leap/,
+    };
+    const entry = [...this.actions.entries()].find(([name]) => aliases[state].test(name)) ?? [...this.actions.entries()][0];
+    const next = entry?.[1];
+    if (!next || next === this.activeAction) return;
+    next.reset().fadeIn(.18).play();
+    this.activeAction?.fadeOut(.18);
+    this.activeAction = next;
+  }
+
+  private updateExternalAnimation(dt: number, speedRatio: number) {
+    if (!this.mixer) return;
+    const state = !this.grounded ? "jump" : this.sprinting ? "sprint" : speedRatio > .58 ? "run" : speedRatio > .12 ? "walk" : "idle";
+    this.playExternalAction(state);
+    this.mixer.update(dt);
   }
 
   update(dt: number, input: InputFrame, canSprint: boolean) {
@@ -189,6 +242,7 @@ export class Camel {
     this.visual.position.y = Math.sin(this.gaitTime * 2) * .06 * speedRatio;
     this.visual.rotation.z += ((-input.turn * .09 * speedRatio) - this.visual.rotation.z) * Math.min(1, dt * 6);
     this.visual.rotation.x += ((Math.atan2(climb, Math.max(.2, Math.abs(distance))) * .2) - this.visual.rotation.x) * Math.min(1, dt * 4);
+    this.updateExternalAnimation(dt, speedRatio);
 
     this.travelSinceStep += Math.abs(distance);
     if (this.grounded && speedRatio > .22 && this.travelSinceStep > .82) {
@@ -203,6 +257,8 @@ export class Camel {
   animateIdle(dt: number, time: number) {
     this.visual.position.y += (Math.sin(time * 1.4) * .025 - this.visual.position.y) * Math.min(1, dt * 3);
     this.visual.rotation.z *= Math.max(0, 1 - dt * 4);
+    this.playExternalAction("idle");
+    this.mixer?.update(dt);
   }
 
   consumeFootprint(): THREE.Vector3 | null {
@@ -215,6 +271,13 @@ export class Camel {
   unlockSaddle() {
     (this.saddle.material as THREE.MeshStandardMaterial).color.setHex(0x2b8b84);
     (this.saddle.material as THREE.MeshStandardMaterial).emissive.setHex(0x0b2827);
+    this.externalModel?.traverse((object) => {
+      if (!(object instanceof THREE.Mesh) || !/saddle|blanket|سرج/i.test(object.name)) return;
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      materials.forEach((item) => {
+        if (item instanceof THREE.MeshStandardMaterial) item.color.setHex(0x2b8b84);
+      });
+    });
   }
 
   get position() {

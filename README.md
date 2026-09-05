@@ -1,71 +1,97 @@
-# Desert Camel
+# جمل الصحراء
 
-A stylized third-person 3D desert exploration game built with React, Three.js, TypeScript, and Vinext.
+لعبة استكشاف وبقاء ثلاثية الأبعاد باللغة العربية، مبنية باستخدام React وThree.js وTypeScript.
 
-Play as **Sahra**, an oasis-seeking camel. Cross dunes, discover landmarks, collect supplies, manage survival needs, and follow the old caravan trail.
+تتحكم في الناقة **صحراء** وتعبر الكثبان بحثًا عن الماء والطعام، وتزور الواحات والمخيمات والقرى والآثار القديمة.
 
-## Current gameplay
+## تشغيل اللعبة
 
-- Third-person camel movement with walking, running, sprinting, jumping, dune climbing, and animated gait
-- Large procedural desert with dunes, rocks, vegetation, an oasis, village, camp, mountains, and ancient ruins
-- Health, stamina, thirst, and hunger systems
-- Water and date pickups with usable supplies
-- Three-stage mission trail with landmark beacons and a cosmetic saddle unlock
-- Dynamic day/night cycle, wind, sandstorms, atmospheric lighting, moving dust, and fading footprints
-- Roaming wild jackals that can damage the player
-- Responsive HUD and dedicated touch controls for mobile devices
-- Keyboard controls for desktop browsers
+يمكن تشغيل النسخة المنشورة على GitHub Pages من الرابط:
 
-## Controls
+**https://3wasfnjd.github.io/camelgame/**
 
-| Action | Keyboard | Touch |
+قد يحتاج أول نشر إلى عدة دقائق بعد رفع الملفات.
+
+## المزايا الحالية
+
+- حركة بمنظور الشخص الثالث: مشي وجري وركض وقفز وتسلق للكثبان.
+- صحراء واسعة مولدة برمجيًا وتحتوي على واحة وقرية ومخيم وآثار وجبال ونباتات وصخور.
+- أنظمة الصحة والتحمل والعطش والجوع.
+- جمع الماء والتمر واستخدام المؤن.
+- ثلاث مهام متتابعة مع إشارات توجه اللاعب ومكافأة شكلية للسرج.
+- تعاقب الليل والنهار ورياح وعواصف رملية وإضاءة متغيرة وآثار أقدام.
+- حيوانات برية متحركة يمكن أن تضر اللاعب.
+- واجهة عربية كاملة من اليمين إلى اليسار.
+- تحكم بلوحة المفاتيح وشاشة لمس للجوال.
+
+## التحكم
+
+| الحركة | لوحة المفاتيح | الجوال |
 | --- | --- | --- |
-| Move and steer | `W A S D` or arrow keys | Virtual joystick |
-| Walk slowly | Hold `Ctrl` | Light joystick input |
-| Sprint | Hold `Shift` | Sprint button |
-| Jump | `Space` | Jump button |
-| Use water or food | `E` | Pause menu supply button |
-| Pause | `P` or `Escape` | Pause button |
+| التحرك والتوجيه | `W A S D` أو الأسهم | عصا التحكم |
+| المشي ببطء | الضغط على `Ctrl` | تحريك العصا بدرجة خفيفة |
+| الركض | الضغط على `Shift` | زر الركض |
+| القفز | `Space` | زر القفز |
+| استخدام الماء أو الطعام | `E` | من قائمة التوقف |
+| إيقاف مؤقت | `P` أو `Escape` | زر التوقف |
 
-## Run locally
+## التشغيل محليًا
 
-Requirements: Node.js 22.13 or later.
+يتطلب Node.js إصدار 22.13 أو أحدث.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Create a production build with:
+لبناء نسخة GitHub Pages:
 
 ```bash
-npm run build
+npm run build:pages
 ```
 
-## Project structure
+## إضافة موديلاتك ثلاثية الأبعاد
+
+ضع الموديلات بصيغة `GLB` داخل المجلد:
 
 ```text
-app/                         Page entry point, metadata, and HUD styling
-components/game/             React game shell and touch interface
-game/Game.ts                 Main render loop and system coordination
-game/core/InputManager.ts    Keyboard and mobile input abstraction
-game/entities/Camel.ts       Camel model, locomotion, gait, and cosmetics
-game/world/DesertWorld.ts    Terrain, landmarks, wildlife, pickups, and effects
-game/systems/GameSystems.ts  Needs, missions, weather, and time-of-day systems
-game/types.ts                Shared game contracts
-public/                      Static public assets
+public/models/
 ```
 
-The systems are separated so more locations, missions, animals, models, and survival mechanics can be added without rewriting the core loop.
+موديل الجمل يجب أن يحمل الاسم:
 
-## Technology
+```text
+public/models/camel.glb
+```
 
-- React 19
-- Three.js
-- TypeScript
-- Vinext / Vite
-- Cloudflare-compatible production output
+ستحاول اللعبة تحميله تلقائيًا بدل الجمل البرمجي الحالي. إذا لم يوجد الملف أو تعذر تحميله فستستمر اللعبة باستخدام الموديل الافتراضي.
 
-## Status
+الحركات المقترحة داخل موديل الجمل:
 
-This repository contains the complete playable prototype. The current camel and environments are procedural low-poly models; production-quality Blender models, skeletal animation clips, audio, save data, and a larger content pipeline are natural next steps.
+- `Idle`
+- `Walk`
+- `Run`
+- `Sprint`
+- `Jump`
+
+توجد تعليمات المقاسات والمحاور والخامات داخل `public/models/README.md`.
+
+## بنية المشروع
+
+```text
+app/                         الصفحة والبيانات الوصفية وتنسيق الواجهة
+components/game/             واجهة اللعبة وأزرار اللمس
+game/Game.ts                 حلقة التشغيل وربط الأنظمة
+game/assets/                 تحميل موديلات GLB وإدارتها
+game/core/InputManager.ts    توحيد تحكم لوحة المفاتيح والجوال
+game/entities/Camel.ts       حركة الجمل والأنيميشن والمظهر
+game/world/DesertWorld.ts    التضاريس والمواقع والحيوانات والمؤثرات
+game/systems/GameSystems.ts  الاحتياجات والمهام والطقس والوقت
+public/models/               موديلات GLB التي ستضيفها
+```
+
+النشر إلى GitHub Pages يتم تلقائيًا عند رفع أي تحديث إلى الفرع `main`.
+
+## حالة المشروع
+
+هذه نسخة أولية قابلة للعب وليست لعبة نهائية. ما يزال المشروع يحتاج موديلات Blender احترافية، أنيميشن أدق، أصوات، حفظ للتقدم، وتصميم محتوى أكبر.

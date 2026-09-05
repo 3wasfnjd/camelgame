@@ -420,12 +420,12 @@ export class DesertWorld {
   }
 
   locationAt(position: THREE.Vector3) {
-    if (position.distanceTo(LANDMARKS.oasis) < 12) return "Moonwell Oasis";
-    if (position.distanceTo(LANDMARKS.ruins) < 14) return "Sunstone Ruins";
-    if (position.distanceTo(LANDMARKS.camp) < 12) return "Ember Camp";
-    if (position.distanceTo(LANDMARKS.village) < 12) return "Saffron Village";
-    if (position.y > 3) return "High Dunes";
-    return "Amber Dunes";
+    if (position.distanceTo(LANDMARKS.oasis) < 12) return "واحة بئر القمر";
+    if (position.distanceTo(LANDMARKS.ruins) < 14) return "أطلال حجر الشمس";
+    if (position.distanceTo(LANDMARKS.camp) < 12) return "مخيم الجمر";
+    if (position.distanceTo(LANDMARKS.village) < 12) return "قرية الزعفران";
+    if (position.y > 3) return "الكثبان العالية";
+    return "كثبان العنبر";
   }
 
   dispose() {

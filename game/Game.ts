@@ -38,7 +38,7 @@ export class Game {
     private readonly mount: HTMLDivElement,
     private readonly onUpdate: (snapshot: GameSnapshot) => void,
   ) {
-    if (!window.WebGLRenderingContext) throw new Error("WebGL unavailable");
+    if (!window.WebGLRenderingContext) throw new Error("تقنية WebGL غير متاحة");
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", alpha: false });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -46,7 +46,7 @@ export class Game {
     this.renderer.toneMappingExposure = 1.08;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.domElement.setAttribute("aria-label", "Playable 3D desert");
+    this.renderer.domElement.setAttribute("aria-label", "صحراء ثلاثية الأبعاد قابلة للعب");
     this.mount.appendChild(this.renderer.domElement);
 
     this.scene.fog = new THREE.FogExp2(0xd69a59, .0065);
@@ -103,7 +103,7 @@ export class Game {
   start() {
     this.started = true;
     this.paused = false;
-    this.showToast("Trail begun — find the turquoise beacon");
+    this.showToast("بدأت الرحلة — ابحث عن الشعاع الفيروزي");
   }
 
   setPaused(value: boolean) {
@@ -149,7 +149,7 @@ export class Game {
 
     if (this.weather.update(dt)) {
       this.world.setWeather(this.weather.current.kind);
-      this.showToast(this.weather.current.kind === "sandstorm" ? "Sandstorm approaching — visibility is falling" : `${this.weather.current.label} over the dunes`);
+      this.showToast(this.weather.current.kind === "sandstorm" ? "عاصفة رملية تقترب — مستوى الرؤية ينخفض" : `${this.weather.current.label} فوق الكثبان`);
     }
 
     const inDanger = this.world.update(dt, this.camel.position, this.weather.current.wind);
@@ -157,7 +157,7 @@ export class Game {
     if (inDanger && this.dangerCooldown <= 0) {
       this.needs.damage(8);
       this.dangerCooldown = 2.2;
-      this.showToast("Wild jackal nearby — keep moving");
+      this.showToast("ابن آوى قريب منك — واصل التحرك");
     }
 
     const footprint = this.camel.consumeFootprint();
@@ -166,7 +166,7 @@ export class Game {
     const collected = this.world.collectNearby(this.camel.position);
     if (collected) {
       this.needs.collect(collected);
-      this.showToast(collected === "water" ? "Water flask collected" : "Fresh dates collected");
+      this.showToast(collected === "water" ? "جمعت قنينة ماء" : "جمعت تمرًا طازجًا");
     }
 
     const missionEvent = this.missions.update(this.camel.position);
@@ -185,7 +185,7 @@ export class Game {
       this.needs.thirst = 45;
       this.needs.hunger = 45;
       this.camel.position.set(48, terrainHeight(48, 35), 35);
-      this.showToast("The camp scouts found Sahra and brought her to safety");
+      this.showToast("عثر مستكشفو المخيم على صحراء وأعادوها إلى مكان آمن");
     }
 
     this.toastRemaining = Math.max(0, this.toastRemaining - dt);
@@ -258,8 +258,8 @@ export class Game {
       time: this.day.formatted,
       weather: this.weather.current.label,
       location: this.world.locationAt(this.camel.position),
-      objective: mission?.title ?? "The Wayfinder's Path",
-      objectiveDetail: mission?.detail ?? "Explore freely and prepare for the next caravan journey.",
+      objective: mission?.title ?? "طريق دليلة القوافل",
+      objectiveDetail: mission?.detail ?? "استكشف الصحراء بحرية واستعد لرحلة القافلة القادمة.",
       objectiveDistance: mission ? Math.round(this.camel.position.distanceTo(mission.target) * 18) : 0,
       level: this.missions.level,
       toast: this.toastText,
