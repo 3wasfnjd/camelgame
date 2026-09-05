@@ -117,6 +117,8 @@ button { font: inherit; }
 .pause-button { pointer-events: auto; align-self: end; justify-self: end; grid-column: 3; grid-row: 3; width: 43px; height: 43px; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; display: grid; place-items: center; color: #fff3db; background: rgba(29,18,12,.72); backdrop-filter: blur(10px); cursor: pointer; }
 .pause-button:hover { background: rgba(55,34,23,.84); }
 .pause-button svg { width: 18px; height: 18px; }
+.vr-hud-button { pointer-events: auto; position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); min-height: 40px; padding: 0 15px; border: 1px solid rgba(101,212,192,.45); border-radius: 999px; display: inline-flex; align-items: center; gap: 7px; color: #d8fff6; background: rgba(17,59,53,.76); backdrop-filter: blur(10px); cursor: pointer; font-weight: 800; }
+.vr-hud-button svg { width: 17px; height: 17px; }
 
 .toast { position: absolute; z-index: 8; left: 50%; bottom: 104px; transform: translate(-50%,24px); max-width: min(90vw,430px); padding: 11px 16px; border: 1px solid rgba(255,221,150,.28); border-radius: 999px; color: #fff2d1; background: rgba(36,21,13,.9); box-shadow: 0 15px 40px rgba(0,0,0,.32); opacity: 0; pointer-events: none; text-align: center; font-size: .8rem; font-weight: 700; transition: opacity 220ms ease, transform 220ms ease; }
 .toast.visible { opacity: 1; transform: translate(-50%,0); }
@@ -136,6 +138,10 @@ button { font: inherit; }
 .start-controls { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 28px; color: #ad997d; font-size: .72rem; }
 .start-controls span { display: flex; align-items: center; gap: 6px; }
 .start-controls kbd { color: #f5dcae; font-weight: 800; }
+.vr-button { border-color: rgba(101,212,192,.5); color: #d8fff6; background: rgba(47,131,117,.2); }
+.vr-controls { max-width: 560px; margin: 18px 0 0; color: #bcd8cf; font-size: .76rem; line-height: 1.7; }
+.vr-controls b { color: #78dac8; }
+.vr-error { margin: 12px 0 0; color: #ffb09f; font-size: .78rem; line-height: 1.6; }
 
 .pause-card { width: min(92vw,390px); border-radius: 24px; padding: 30px; text-align: center; }
 .pause-card h2 { margin: 8px 0; font-family: Tahoma,Arial,sans-serif; font-size: 2rem; }

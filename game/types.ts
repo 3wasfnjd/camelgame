@@ -22,6 +22,10 @@ export type MobileControls = {
   jump: boolean;
 };
 
+export type XRControls = MobileControls & {
+  use: boolean;
+};
+
 export type InputFrame = {
   forward: number;
   turn: number;

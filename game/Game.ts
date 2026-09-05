@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { InputManager } from "@/game/core/InputManager";
+import { XRInputManager } from "@/game/core/XRInputManager";
 import { Camel } from "@/game/entities/Camel";
 import { DayNightSystem, MissionSystem, NeedsSystem, WeatherSystem } from "@/game/systems/GameSystems";
 import { DesertWorld, terrainHeight } from "@/game/world/DesertWorld";
@@ -7,11 +8,22 @@ import type { GameSnapshot, MobileControls } from "@/game/types";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
+type XRSystemLike = {
+  isSessionSupported: (mode: "immersive-vr") => Promise<boolean>;
+  requestSession: (mode: "immersive-vr", options: object) => Promise<EventTarget>;
+};
+
+function xrSystem() {
+  return (navigator as Navigator & { xr?: XRSystemLike }).xr;
+}
+
 export class Game {
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(58, 1, .1, 380);
   private readonly renderer: THREE.WebGLRenderer;
   private readonly input = new InputManager();
+  private readonly xrInput = new XRInputManager();
+  private readonly xrRig = new THREE.Group();
   private readonly world = new DesertWorld(this.scene);
   private readonly camel = new Camel(terrainHeight);
   private readonly needs = new NeedsSystem();
@@ -23,7 +35,6 @@ export class Game {
   private readonly sunDisk: THREE.Mesh;
   private readonly stars: THREE.Points;
   private readonly resizeObserver: ResizeObserver;
-  private animationFrame = 0;
   private lastTime = performance.now();
   private started = false;
   private paused = false;
@@ -37,6 +48,7 @@ export class Game {
   constructor(
     private readonly mount: HTMLDivElement,
     private readonly onUpdate: (snapshot: GameSnapshot) => void,
+    private readonly onXRChange: (active: boolean) => void = () => undefined,
   ) {
     if (!window.WebGLRenderingContext) throw new Error("تقنية WebGL غير متاحة");
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", alpha: false });
@@ -46,8 +58,14 @@ export class Game {
     this.renderer.toneMappingExposure = 1.08;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.xr.enabled = true;
+    this.renderer.xr.setReferenceSpaceType("local-floor");
     this.renderer.domElement.setAttribute("aria-label", "صحراء ثلاثية الأبعاد قابلة للعب");
     this.mount.appendChild(this.renderer.domElement);
+    this.xrRig.add(this.camera);
+    this.scene.add(this.xrRig);
+    this.addControllerRay(0);
+    this.addControllerRay(1);
 
     this.scene.fog = new THREE.FogExp2(0xd69a59, .0065);
     this.scene.add(this.hemisphere);
@@ -81,7 +99,18 @@ export class Game {
     this.resize();
     this.applyAtmosphere();
     this.emitSnapshot();
-    this.animationFrame = requestAnimationFrame(this.loop);
+    this.renderer.setAnimationLoop(this.loop);
+  }
+
+  private addControllerRay(index: number) {
+    const controller = this.renderer.xr.getController(index);
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, -2.5),
+    ]);
+    const ray = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0x65d4c0, transparent: true, opacity: .72 }));
+    controller.add(ray);
+    this.xrRig.add(controller);
   }
 
   private createStars() {
@@ -104,6 +133,31 @@ export class Game {
     this.started = true;
     this.paused = false;
     this.showToast("بدأت الرحلة — ابحث عن الشعاع الفيروزي");
+  }
+
+  async isVRSupported() {
+    const xr = xrSystem();
+    return Boolean(xr && await xr.isSessionSupported("immersive-vr"));
+  }
+
+  async enterVR() {
+    const xr = xrSystem();
+    if (!xr) throw new Error("متصفح هذا الجهاز لا يدعم WebXR");
+    const session = await xr.requestSession("immersive-vr", {
+      optionalFeatures: ["local-floor", "bounded-floor", "dom-overlay"],
+      domOverlay: { root: this.mount.parentElement ?? this.mount },
+    });
+    session.addEventListener("end", () => {
+      this.input.setXRControls({ forward: 0, turn: 0, sprint: false, jump: false, use: false });
+      this.xrRig.position.set(0, 0, 0);
+      this.xrRig.rotation.set(0, 0, 0);
+      this.camera.position.set(0, 5, -14);
+      this.firstFrame = true;
+      this.onXRChange(false);
+    }, { once: true });
+    await this.renderer.xr.setSession(session);
+    this.start();
+    this.onXRChange(true);
   }
 
   setPaused(value: boolean) {
@@ -136,10 +190,10 @@ export class Game {
 
     this.renderer.render(this.scene, this.camera);
     this.firstFrame = false;
-    this.animationFrame = requestAnimationFrame(this.loop);
   };
 
   private update(dt: number) {
+    this.input.setXRControls(this.xrInput.sample(this.renderer.xr.getSession()));
     const input = this.input.sample();
     if (input.usePressed) this.useSupply();
 
@@ -221,13 +275,24 @@ export class Game {
     const sunX = Math.cos(angle) * 92;
     this.sun.position.set(sunX, sunY, -58);
     this.sun.target.position.copy(this.camel.position);
-    this.sunDisk.position.copy(this.camera.position).add(new THREE.Vector3(sunX, sunY, -78).normalize().multiplyScalar(130));
+    const cameraWorldPosition = this.camera.getWorldPosition(new THREE.Vector3());
+    this.sunDisk.position.copy(cameraWorldPosition).add(new THREE.Vector3(sunX, sunY, -78).normalize().multiplyScalar(130));
     this.sunDisk.visible = sunY > -5 && this.weather.current.kind !== "sandstorm";
     (this.stars.material as THREE.PointsMaterial).opacity = Math.pow(1 - daylight, 2) * .82;
     this.stars.position.set(this.camel.position.x, 0, this.camel.position.z);
   }
 
   private updateCamera(dt: number) {
+    if (this.renderer.xr.isPresenting) {
+      const offset = new THREE.Vector3(0, 3.9, -14.2).applyAxisAngle(UP, this.camel.yaw);
+      const targetPosition = this.camel.position.clone().add(offset);
+      const follow = this.firstFrame ? 1 : 1 - Math.exp(-dt * 3.2);
+      this.xrRig.position.lerp(targetPosition, follow);
+      this.xrRig.rotation.y = this.camel.yaw + Math.PI;
+      this.camera.position.set(0, 0, 0);
+      return;
+    }
+
     // Keep enough distance to frame the camel from hoof to head, including taller custom models.
     const offset = new THREE.Vector3(0, 5.6, -14.2).applyAxisAngle(UP, this.camel.yaw);
     const targetPosition = this.camel.position.clone().add(offset);
@@ -277,7 +342,9 @@ export class Game {
 
   dispose() {
     this.disposed = true;
-    cancelAnimationFrame(this.animationFrame);
+    const session = this.renderer.xr.getSession();
+    if (session) void session.end();
+    this.renderer.setAnimationLoop(null);
     this.resizeObserver.disconnect();
     this.input.dispose();
     this.world.dispose();
@@ -286,6 +353,11 @@ export class Game {
     (this.sunDisk.material as THREE.Material).dispose();
     this.stars.geometry.dispose();
     (this.stars.material as THREE.Material).dispose();
+    this.xrRig.traverse((object) => {
+      if (!(object instanceof THREE.Line)) return;
+      object.geometry.dispose();
+      (object.material as THREE.Material).dispose();
+    });
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }

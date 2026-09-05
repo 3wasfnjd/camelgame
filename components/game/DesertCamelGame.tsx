@@ -2,7 +2,7 @@
 
 import {
   Beef, CirclePause, Clock3, Compass, Droplets, Heart, MapPin,
-  PackageOpen, Play, ShieldAlert, Sparkles, Sun, Wheat, Zap,
+  Gamepad2, PackageOpen, Play, ShieldAlert, Sparkles, Sun, Wheat, Zap,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
@@ -60,6 +60,9 @@ export function DesertCamelGame() {
   const [started, setStarted] = useState(false);
   const [paused, setPaused] = useState(false);
   const [error, setError] = useState("");
+  const [vrSupported, setVrSupported] = useState(false);
+  const [vrActive, setVrActive] = useState(false);
+  const [vrError, setVrError] = useState("");
   const [joy, setJoy] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -69,7 +72,8 @@ export function DesertCamelGame() {
       try {
         const { Game } = await import("@/game/Game");
         if (disposed || !mountRef.current) return;
-        gameRef.current = new Game(mountRef.current, setSnapshot);
+        gameRef.current = new Game(mountRef.current, setSnapshot, setVrActive);
+        void gameRef.current.isVRSupported().then(setVrSupported).catch(() => setVrSupported(false));
         setReady(true);
       } catch (reason) {
         console.error(reason);
@@ -101,6 +105,18 @@ export function DesertCamelGame() {
     gameRef.current?.start();
     setStarted(true);
     setPaused(false);
+  }, []);
+
+  const enterVR = useCallback(async () => {
+    setVrError("");
+    try {
+      await gameRef.current?.enterVR();
+      setStarted(true);
+      setPaused(false);
+    } catch (reason) {
+      console.error(reason);
+      setVrError("تعذر دخول الواقع الافتراضي. افتح اللعبة من متصفح Meta Quest واسمح باستخدام النظارة.");
+    }
   }, []);
 
   const resume = useCallback(() => {
@@ -225,6 +241,7 @@ export function DesertCamelGame() {
             </div>
 
             <button className="pause-button" type="button" onClick={togglePause} aria-label="إيقاف اللعبة مؤقتًا"><CirclePause /></button>
+            {vrSupported && !vrActive && <button className="vr-hud-button" type="button" onClick={enterVR}><Gamepad2 /> دخول VR</button>}
           </section>
 
           <div className={`toast ${snapshot.toast ? "visible" : ""}`} role="status" aria-live="polite">{snapshot.toast}</div>
@@ -251,7 +268,12 @@ export function DesertCamelGame() {
             <div className="title-mark"><Sparkles size={15} /> رحلة في الصحراء المفتوحة</div>
             <h1 className="game-title">جمل <span>الصحراء</span></h1>
             <p className="start-copy">اعبر الكثبان المتحركة، واعثر على واحة بئر القمر، ثم اتبع طريق القوافل القديم نحو الآثار المنسية. حافظ على غذاء صحراء وراحتها، وابقَ متقدمًا على العاصفة.</p>
-            <div className="button-row"><button className="primary-button" type="button" onClick={begin}><Play size={17} /> ابدأ الرحلة</button></div>
+            <div className="button-row">
+              <button className="primary-button" type="button" onClick={begin}><Play size={17} /> ابدأ الرحلة</button>
+              {vrSupported && <button className="secondary-button vr-button" type="button" onClick={enterVR}><Gamepad2 size={18} /> دخول Meta Quest</button>}
+            </div>
+            {vrSupported && <p className="vr-controls"><b>تحكم Quest:</b> اليسرى للحركة · اليمنى للتوجيه · <span dir="ltr">A / X</span> للقفز · القبضة للركض · الزناد لاستخدام المؤن</p>}
+            {vrError && <p className="vr-error" role="alert">{vrError}</p>}
             <div className="start-controls">
               <span><kbd dir="ltr">WASD</kbd> توجيه</span><span><kbd dir="ltr">SHIFT</kbd> ركض</span><span><kbd dir="ltr">SPACE</kbd> قفز</span><span><kbd dir="ltr">E</kbd> استخدام المؤن</span>
             </div>
