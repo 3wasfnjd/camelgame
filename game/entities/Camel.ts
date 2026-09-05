@@ -148,6 +148,8 @@ export class Camel {
     const loaded = await loadOptionalModel("camel");
     if (!loaded) return;
 
+    // The supplied mesh is authored lengthwise on +X; the game travels toward +Z.
+    loaded.scene.rotation.y = -Math.PI / 2;
     fitModelToHeight(loaded.scene, 4.9);
     loaded.scene.traverse((object) => {
       if (!(object instanceof THREE.Mesh)) return;

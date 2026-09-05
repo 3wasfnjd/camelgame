@@ -228,14 +228,15 @@ export class Game {
   }
 
   private updateCamera(dt: number) {
-    const offset = new THREE.Vector3(0, 4.7, -9.3).applyAxisAngle(UP, this.camel.yaw);
+    // Keep enough distance to frame the camel from hoof to head, including taller custom models.
+    const offset = new THREE.Vector3(0, 5.6, -14.2).applyAxisAngle(UP, this.camel.yaw);
     const targetPosition = this.camel.position.clone().add(offset);
     const follow = this.firstFrame ? 1 : 1 - Math.exp(-dt * 4.8);
     this.camera.position.lerp(targetPosition, follow);
     const forward = new THREE.Vector3(Math.sin(this.camel.yaw), 0, Math.cos(this.camel.yaw));
-    const lookAt = this.camel.position.clone().add(new THREE.Vector3(0, 2.15, 0)).addScaledVector(forward, 2.5);
+    const lookAt = this.camel.position.clone().add(new THREE.Vector3(0, 2.35, 0)).addScaledVector(forward, 2.8);
     this.camera.lookAt(lookAt);
-    const targetFov = this.camel.sprinting ? 64 : 58;
+    const targetFov = this.camel.sprinting ? 65 : 60;
     this.camera.fov += (targetFov - this.camera.fov) * Math.min(1, dt * 3.5);
     this.camera.updateProjectionMatrix();
   }
